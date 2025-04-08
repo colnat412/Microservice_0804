@@ -1,54 +1,24 @@
-
+version: '3'
 services:
-  postgres-product:
-    image: postgres
-    environment:
-      POSTGRES_DB: productdb
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
+  rabbitmq:
+    image: rabbitmq:3-management
     ports:
-      - "5433:5432"
-
-  postgres-order:
-    image: postgres
-    environment:
-      POSTGRES_DB: orderdb
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-    ports:
-      - "5434:5432"
-
-  postgres-customer:
-    image: postgres
-    environment:
-      POSTGRES_DB: customerdb
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-    ports:
-      - "5435:5432"
-
-  product-service:
-    build: ./product-service
-    ports:
-      - "3001:3000"
-    depends_on:
-      - postgres-product
-
-  order-service:
-    build: ./order-service
-    ports:
-      - "3002:3000"
-    depends_on:
-      - postgres-order
-
-  customer-service:
-    build: ./customer-service
-    ports:
-      - "3003:3000"
-    depends_on:
-      - postgres-customer
-
+      - "5672:5672" # RabbitMQ port
+      - "15672:15672" # Management UI
   api-gateway:
     build: ./api-gateway
     ports:
       - "3000:3000"
+    depends_on:
+      - product-service
+      - order-service
+  product-service:
+    build: ./product-service
+    ports:
+      - "3001:3001"
+  order-service:
+    build: ./order-service
+    ports:
+      - "3002:3002"
+    depends_on:
+      - rabbitmq
